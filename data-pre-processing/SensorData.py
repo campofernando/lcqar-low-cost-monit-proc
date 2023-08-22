@@ -4,7 +4,8 @@ import numpy as np
 import os
 
 class SensorData:
-    def __init__(self, sensor_id, sensor_name, lower_limit, upper_limit, t_90, t_90_value, sampling_period, get_service) -> None:
+    def __init__(self, sensor_id, sensor_name, lower_limit, upper_limit, t_90, t_90_value, sampling_period, get_service,
+                 molar_mass) -> None:
         self.__sensor_id = sensor_id
         self.__sensor_name = sensor_name
         self.__get_service = get_service
@@ -13,6 +14,7 @@ class SensorData:
         self.__t_90 = t_90 / 2
         self.__t_90_value = t_90_value
         self.__sampling_period = sampling_period
+        self.__molar_mass__ = molar_mass
         self.web_dataframe = []
         self.sensor_dataframe = []
         self.sensor_dataframe_1hr = []
@@ -50,6 +52,7 @@ class SensorData:
         self.sensor_dataframe['Diff'] = self.sensor_dataframe['measuring'].resample('15T').mean().diff() 
         self.sensor_dataframe['Tag'] = (self.sensor_dataframe[['Tag', 'Diff']]
                                         .apply(lambda df: self.__tag_data_with_diff__(tagged_df=df), axis=1))
+        self.sensor_dataframe['value'] = self.sensor_dataframe['measuring'].map(lambda v: 0.0409*v*self.__molar_mass__/1e3)
         self.valid_differential_series = self.sensor_dataframe[self.sensor_dataframe['Tag'] == 'VALID']['Diff']
         
         # Separate valid dataframe
@@ -91,6 +94,7 @@ class SensorData:
                                                c / (pd.Timedelta("1 hour") / original_freq) * 100))
         resampled_dataframe['Tag'] = (resampled_dataframe['% valid']
                                         .map(lambda c: 'VALID' if c >= 75 else 'LOWSAMPLES'))
+        resampled_dataframe.index = resampled_dataframe.index.map(lambda t: t.replace(minute=30, second=0))
         return resampled_dataframe
 
     def calculate_and_tag_quantiles(self):
