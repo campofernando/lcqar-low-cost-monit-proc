@@ -118,11 +118,13 @@ class SensorData:
         if not os.path.exists(directory_path):
             os.makedirs(directory_path)
 
-        self.web_dataframe.to_csv(directory_path + self.__sensor_name + 'web_dataframe.csv')
+        processing_directory_path = '../data-processing/input/' 
         self.sensor_dataframe.to_csv(directory_path + self.__sensor_name + 'sensor_dataframe.csv')
         self.sensor_dataframe_1hr.to_csv(directory_path + self.__sensor_name + 'sensor_dataframe_1hr.csv')
+        self.sensor_dataframe_1hr.to_csv(processing_directory_path + self.__sensor_name + 'sensor_dataframe_1hr.csv')
 
     def read_from_csv(self):
-        df = pd.read_csv(self.__sensor_name + 'web_dataframe.csv')
+        directory_path = 'data/input/'
+        df = pd.read_csv(directory_path + self.__sensor_name + 'web_dataframe.csv')
         self.web_dataframe = df.drop(df.columns[0], axis='columns')
         self.web_dataframe['DateTime'] = (pd.to_datetime(df['DateTime'], infer_datetime_format=True))

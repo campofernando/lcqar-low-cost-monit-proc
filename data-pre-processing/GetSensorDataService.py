@@ -18,5 +18,6 @@ class GetSensorDataService:
         df = df.rename(columns={'Value': 'measuring', 'Latitude': 'latitude', 'Longitude': 'longitude'})
         df = (df.where(df['DateTime'] > dt.datetime(2020, 1, 1, 0, 0, 0))
                 .where(df['DateTime'] <= dt.datetime.now()).dropna())
-        df.to_csv(sensor_name + 'web_dataframe.csv') 
+        path = "data/input/"
+        df.to_csv(path + sensor_name + 'web_dataframe.csv') 
         return df
