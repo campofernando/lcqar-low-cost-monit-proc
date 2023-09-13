@@ -125,6 +125,7 @@ class SensorData:
         processing_directory_path = '../data-processing/input/' 
         self.sensor_dataframe.to_csv(directory_path + self.__sensor_name + 'sensor_dataframe.csv')
         self.sensor_dataframe_1hr.to_csv(directory_path + self.__sensor_name + 'sensor_dataframe_1hr.csv')
+        self.sensor_dataframe.to_csv(processing_directory_path + self.__sensor_name + 'sensor_dataframe.csv')
         self.sensor_dataframe_1hr.to_csv(processing_directory_path + self.__sensor_name + 'sensor_dataframe_1hr.csv')
 
     def read_from_csv(self):

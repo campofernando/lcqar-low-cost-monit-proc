@@ -3,6 +3,28 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class SensorDataAnalysisService:
+
+    def get_tags_from_series(value, lower_limit, upper_limit):
+        if (value <= -9000.0  or 
+            np.isnan(value))  : return 'MISSING' 
+        if value < lower_limit: return 'LTLL'
+        if value > upper_limit: return 'GTUL'
+        return 'VALID'
+    
+    def tag_data_with_diff(tagged_df, sampling_period, t_90, t_90_value):
+        current_tag = tagged_df[0]
+        value = tagged_df[1]
+        if ((current_tag != 'VALID') or (np.isnan(value))): return current_tag
+        max_diff_value = sampling_period / t_90 * t_90_value
+        if ((value > max_diff_value) or (value < -max_diff_value)): return 'BADSPIKE'
+        return 'VALID'
+    
+    def tag_by_quantiles(current_tag, value, quantile_01, quantile_99):
+        if ((current_tag != 'VALID') or (np.isnan(value))): return current_tag
+        if value <= quantile_01: return 'LTQTLE01'
+        if value >= quantile_99: return 'GTQTLE99'
+        return 'VALID'
+    
     def count_tags(tags_list, df):
         tags_list.append('TOTAL')
         count = len(df)
@@ -15,7 +37,20 @@ class SensorDataAnalysisService:
             data_count.loc[tag] = [val, (val/count)*100]
 
         return data_count
-    
+
+    def get_hour_statistics(valid_dataframe, original_freq):
+        resampled_dataframe = valid_dataframe.resample('H').mean()
+        valid_dataframe['Hour'] = valid_dataframe.index.hour
+        valid_dataframe['Count'] = (valid_dataframe.resample('H').count()['measuring'])
+        valid_dataframe['Std'] = (valid_dataframe.resample('H').std()['measuring'])
+        valid_dataframe['% valid'] = (resampled_dataframe['Count']
+                                          .map(lambda c:
+                                               c / (pd.Timedelta("1 hour") / original_freq) * 100))
+        resampled_dataframe['Tag'] = (resampled_dataframe['% valid']
+                                        .map(lambda c: 'VALID' if c >= 75 else 'LOWSAMPLES'))
+        resampled_dataframe.index = resampled_dataframe.index.map(lambda t: t.replace(minute=30, second=0))
+        return resampled_dataframe
+  
     def plot_mean_vs_std(df):
         fig = plt.figure(figsize=(1.3*7,7))
         plt.scatter(df['Std'], df['measuring'], c=df['% valid'], cmap='jet')
