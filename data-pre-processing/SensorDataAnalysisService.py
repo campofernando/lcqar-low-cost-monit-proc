@@ -113,3 +113,36 @@ class SensorDataAnalysisService:
                 axis='columns', how='all').plot.box(
                     ax=ax_box,title='Comportamento médio no período')
         ax_box.set_ylim(ax_hist.get_ylim())
+    
+    def plot_box(df, bins):
+        bottom, height = 0.1, 0.65
+        left, width = bottom, height*1.3
+        spacing = 0.005
+        
+        rect_ser = [left-width-spacing, bottom, width, height]
+        rect_box = [left, bottom, width, height]
+
+        plt.figure(figsize=(1.3*7,7))
+
+        ax_ser  = plt.axes(rect_ser)
+        ax_ser.tick_params(direction='in', top=True, right=True)
+        ax_ser.set_title('Série temporal')
+        ax_ser.set_xlabel("Data e hora")
+        ax_ser.set_ylabel("Leituras de concentração (ppb)")
+
+        ax_box  = plt.axes(rect_box)
+        ax_box.tick_params(direction='in', labelleft=False)
+
+        lim_max = df['measuring'].max()+df['measuring'].max()*10/100
+        lim_min = df['measuring'].min()-df['measuring'].min()*10/100
+
+        df['measuring'].plot(ax=ax_ser)
+        ax_ser.set_ylim(lim_min, lim_max)
+
+        df = df.dropna(axis='index', how='all', subset=['Hour'])
+        df['Hour'] = df['Hour'].astype('int64')
+        df.pivot(columns='Hour')['measuring'].dropna(
+                axis='columns', how='all').plot.box(
+                    ax=ax_box,title='Comportamento horário no período')
+        ax_box.set_ylim(lim_min, lim_max)
+        ax_box.set_xlabel("Horas do dia")
