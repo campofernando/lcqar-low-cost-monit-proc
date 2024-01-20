@@ -114,7 +114,7 @@ class SensorDataAnalysisService:
                     ax=ax_box,title='Comportamento médio no período')
         ax_box.set_ylim(ax_hist.get_ylim())
     
-    def plot_box(df, bins):
+    def plot_box(df):
         bottom, height = 0.1, 0.65
         left, width = bottom, height*1.3
         spacing = 0.005
