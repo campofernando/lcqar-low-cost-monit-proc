@@ -122,7 +122,7 @@ class SensorDataAnalysisService:
         rect_ser = [left-width-spacing, bottom, width, height]
         rect_box = [left, bottom, width, height]
 
-        plt.figure(figsize=(1.3*7,7))
+        plt.figure(figsize=(1.3*5,5))
 
         ax_ser  = plt.axes(rect_ser)
         ax_ser.tick_params(direction='in', top=True, right=True)
